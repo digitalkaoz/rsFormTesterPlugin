@@ -366,7 +366,7 @@ class rsFormTester
   protected function sanitizeDataSet(array $set)
   {
     //add csrf field
-    if($this->form->isCSRFProtected())
+    if($this->getForm()->isCSRFProtected())
     {
       $set = array_merge($set,array($this->form->getCSRFFieldName() => $this->form->getCSRFToken()));
     }
