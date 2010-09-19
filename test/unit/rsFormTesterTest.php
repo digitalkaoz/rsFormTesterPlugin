@@ -3,7 +3,7 @@
 require_once dirname(__FILE__).'/../bootstrap/unit.php';
 require_once dirname(__FILE__).'/../fixtures/project/lib/form/rsFormTesterForm.php';
 
-$file = sfConfig::get('sf_config_dir').'/form_tester.yml';
+$file = dirname(__FILE__).'/../fixtures/project/test/fixtures/form_tester.yml';
 $file_config = sfYaml::load($file);
 $defaults = array(
     'withSave' => false,
@@ -13,7 +13,7 @@ $defaults = array(
   );
 
 $testCount = 18;
-$t = new lime_test($testCount, new lime_output_color());
+$t = new lime_test();
 
 //@Test instanciations
 $t->diag('test instanciations');
