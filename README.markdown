@@ -11,7 +11,7 @@ Installation
 svn co http://svn.github.com/digitalkaoz/rsFormTesterPlugin.git
 
 **git:**
-git clone [git@github.com:digitalkaoz/rsFormTesterPlugin.git][2]
+git clone git@github.com:digitalkaoz/rsFormTesterPlugin.git[2]
 
 **pear:**
 symfony plugin install rsFormTesterPlugin
