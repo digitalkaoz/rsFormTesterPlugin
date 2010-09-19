@@ -73,7 +73,7 @@ in your tests you are able to use the tester this way:
 
 **Dont forget to increase the test count if you defined one**
 
-*Thats all the different sets of data will be iterated and compared to what you expect*
+*Thats it! All the different sets of data will be iterated and compared to what you expect*
 
 TODO
 ----
