@@ -156,8 +156,6 @@ class rsFormTester
       return $this;
     }
 
-    $tester->diag('testing '.$which.' data');
-
     $sets = ($which == 'valid') ? $this->validData : $this->invalidData;
 
     foreach($sets as $key => $dataSet)
@@ -177,9 +175,6 @@ class rsFormTester
       {
         $this->checkInvalidForm($tester,$key,$expectedErrors);        
       }
-
-      //display all messages for this set
-      $this->flushMessages($tester);
     }
 
     return $this;
@@ -189,15 +184,20 @@ class rsFormTester
    * prints the messages for a dateSet
    *
    * @param mixed $tester
+   * @param string $setType
+   * @param boolean force
+   * @return string
    */
-  protected function flushMessages($tester)
+  protected function flushMessages($tester,$setType,$setName, $force=false)
   {
-    if($this->messages)
+    if(($force || $this->getAttribute('verbose')) && $this->messages)
     {
       sort($this->messages);
-      $tester->error(join("\n",$this->messages));
-      $this->messages = array();
+      $messages = join("\n",$this->messages);
+      $tester->info(sprintf("%s set[%s]:\n%s\n",$setType,$setName,$messages));
     }
+
+    $this->messages = array();
   }
 
   /**
@@ -211,7 +211,14 @@ class rsFormTester
     if(!$this->form->isValid())
     {
       //the form isnt valid so fail the test and print the errors
-      $tester->fail(sprintf('form is valid for dataset [%s]',$key+1));
+      $tester->fail(sprintf("form is valid for dataset [%s]",$key));
+
+      //check for errors if needed
+      if($this->getAttribute('verbose'))
+      {
+        $this->iterateErrors($this->form->getErrorSchema(),array());
+        $this->flushMessages($tester,'valid',$key, true);
+      }
     }
     else
     {
@@ -221,13 +228,7 @@ class rsFormTester
         $this->form->save();
       }
 
-      $tester->is($this->form->isValid(),true,sprintf('form is valid for dataset [%s]',$key+1));
-    }
-
-    //check for errors if needed
-    if($this->getAttribute('verbose'))
-    {
-      $this->iterateErrors($this->form->getErrorSchema(),array());
+      $tester->is($this->form->isValid(),true,sprintf("form is valid for dataset [%s]",$key));
     }
   }
 
@@ -240,23 +241,26 @@ class rsFormTester
    */
   protected function checkInvalidForm($tester, $key, $expectedErrors)
   {
-    if($this->form->isValid())
-    {
-      //the form is valid, so fail the test
-      $tester->fail(sprintf('form is invalid for dataset [%s]',$key+1));
-    }
-    else
-    {
-      //everything ok, the form isnt valid, so pass the test
-      $tester->pass(sprintf('form is invalid for dataset [%s]',$key+1));
-    }
-    
     //check for errors if needed
     if($this->getAttribute('verbose'))
     {
       $this->checkForExpectedErrors($expectedErrors);
       $this->iterateErrors($this->form->getErrorSchema(),$expectedErrors);
     }
+    
+    if($this->form->isValid())
+    {
+      //the form is valid, so fail the test
+      $tester->fail(sprintf("form is invalid for dataset [%s]",$key));
+    }
+    else
+    {
+      //everything ok, the form isnt valid, so pass the test
+      $tester->pass(sprintf("form is invalid for dataset [%s]",$key));
+    }
+
+    $this->flushMessages($tester,'invalid',$key);
+
   }
 
   /**
@@ -280,7 +284,7 @@ class rsFormTester
       //the expected error was not raised, so add add a message
       if(!$fieldError && !$globalError && !$namedError)
       {
-        $this->messages[] = 'info: expected error "'.$error.'" not raised';
+        $this->messages[] = sprintf('[expected error] "%s" not raised',$error);
       }
     }
   }
@@ -307,9 +311,9 @@ class rsFormTester
       $field = ($message != $error->getMessage()) ? $message : $field;
 
       //not found in expected errors, so add a message
-      if(!in_array($prefix.$field,$expectedErrors))
+      if(!$expectedErrors || !in_array($prefix.$field,$expectedErrors))
       {
-        $this->messages[] = 'error: '.($message != $error->getMessage() ? $error : '"'.$prefix.$field.'"').' raised';
+        $this->messages[] = '[error] '.($message != $error->getMessage() ? $error : '"'.$prefix.$field.'"').' raised';
       }
     }
   }
