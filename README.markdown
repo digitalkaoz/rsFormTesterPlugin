@@ -11,7 +11,7 @@ Installation
 svn co [http://svn.github.com/digitalkaoz/rsFormTesterPlugin.git](http://svn.github.com/digitalkaoz/rsFormTesterPlugin.git)
 
 **git:**
-git clone git@github.com:digitalkaoz/rsFormTesterPlugin.git[2]
+git clone [git@github.com:digitalkaoz/rsFormTesterPlugin.git][git@github.com:digitalkaoz/rsFormTesterPlugin.git]
 
 **pear:**
 symfony plugin install rsFormTesterPlugin
@@ -48,7 +48,7 @@ Configuration
 
   - The **withSave** option invokes a sfForm::save call.
 
-  - The **verbose** option enables more detailed information on each test (recommended)
+  - The **verbose** option enables more detailed information on each test (**recommended**)
 
   - The **pass** options holds all different datasets which should pass the form validation.
 
@@ -59,16 +59,17 @@ Configuration
 Usage
 -----
 
-instanciate the tester with the configuration file in one line:
-
-    $tester = rsFormTester::create('path/to/config.yml');
-
 in your tests you are able to use the tester this way:
 
     /* @var $t lime_test */
+
+    $tester = rsFormTester::create('path/to/config.yml');
     $tester->testData($t);         #for both set
     $tester->testData($t,'valid'); # for valid sets only
     $tester->testData($t,'invalid'); # for invalid sets only
+    
+    //or the short way
+    $tester = rsFormTester::create('path/to/config.yml')->testData($t);
 
 **Dont forget to increase the test count if you defined one**
 
@@ -77,4 +78,5 @@ in your tests you are able to use the tester this way:
 TODO
 ----
   - fix the form field unset option (e.g. for unsetting captchas from fieldschema)
+  - remove dependency to lime
 
