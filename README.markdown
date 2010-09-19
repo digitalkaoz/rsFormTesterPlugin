@@ -8,7 +8,7 @@ Installation
 ------------------
 
 **svn:**
-svn co [http://svn.github.com/digitalkaoz/rsFormTesterPlugin.git]()
+svn co [http://svn.github.com/digitalkaoz/rsFormTesterPlugin.git](http://svn.github.com/digitalkaoz/rsFormTesterPlugin.git)
 
 **git:**
 git clone git@github.com:digitalkaoz/rsFormTesterPlugin.git[2]
