@@ -56,13 +56,6 @@ Configuration
 
 **Notice the *foo/bar/bazz/* notation, thats how you define errors in embedded forms.**
 
-If you will you can pass an already instanciated form to the tester (before runnning your tests)
-
-    $form = new FooBarForm($object,array('special_option'=>'foo'),array('special_arg'=>'bar'));
-    $tester->setForm($form);
- 
-    //go on with your tests
-
 
 Usage
 -----
@@ -79,9 +72,17 @@ in your tests you are able to use the tester this way:
     //or the short way
     $tester = rsFormTester::create('path/to/config.yml')->testData($t);
 
-**Dont forget to increase the test count if you defined one**
+**Dont forget to increase the test count if you defined one!**
 
-*Thats it! All the different sets of data will be iterated and compared to what you expect*
+If you will you can pass an already instanciated form to the tester (before runnning your tests)
+
+    $form = new FooBarForm($object,array('special_option'=>'foo'),array('special_arg'=>'bar'));
+    $tester->setForm($form);
+ 
+    //go on with your tests
+
+
+*That's it! All the different sets of data will be iterated and compared to what you expect*
 
 TODO
 ----
