@@ -7,11 +7,11 @@ rsFormTesterPlugin
 Installation
 ------------------
 
+**git (recommend):**
+git clone [git@github.com:digitalkaoz/rsFormTesterPlugin.git](git@github.com:digitalkaoz/rsFormTesterPlugin.git)
+
 **svn:**
 svn co [http://svn.github.com/digitalkaoz/rsFormTesterPlugin.git](http://svn.github.com/digitalkaoz/rsFormTesterPlugin.git)
-
-**git:**
-git clone [git@github.com:digitalkaoz/rsFormTesterPlugin.git](git@github.com:digitalkaoz/rsFormTesterPlugin.git)
 
 **pear:**
 symfony plugin install rsFormTesterPlugin
@@ -42,10 +42,10 @@ Configuration
     fail:
       -
         _expectedErrors: [foo, bazz, bazz/bar]
-        foo: 
+        foo:
         bar: bazz
         bazz:
-          bar: 
+          bar:
           foo: bar
       # ...
 
@@ -79,7 +79,7 @@ in your tests you are able to use the tester this way:
     $tester->testData($t);         #for both set
     $tester->testData($t,'valid'); # for valid sets only
     $tester->testData($t,'invalid'); # for invalid sets only
-    
+
     //or the short way
     $tester = rsFormTester::create('path/to/config.yml')->testData($t);
 
@@ -89,7 +89,7 @@ If you will you can pass an already instanciated form to the tester (before runn
 
     $form = new FooBarForm($object,array('special_option'=>'foo'),array('special_arg'=>'bar'));
     $tester->setForm($form);
- 
+
     //go on with your tests
 
 

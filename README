@@ -7,11 +7,11 @@ rsFormTesterPlugin
 Installation
 ------------------
 
+**git (recommend):**
+git clone [git@github.com:digitalkaoz/rsFormTesterPlugin.git](git@github.com:digitalkaoz/rsFormTesterPlugin.git)
+
 **svn:**
 svn co [http://svn.github.com/digitalkaoz/rsFormTesterPlugin.git](http://svn.github.com/digitalkaoz/rsFormTesterPlugin.git)
-
-**git:**
-git clone [git@github.com:digitalkaoz/rsFormTesterPlugin.git](git@github.com:digitalkaoz/rsFormTesterPlugin.git)
 
 **pear:**
 symfony plugin install rsFormTesterPlugin
@@ -22,12 +22,17 @@ Configuration
 -------------
 
     configuration:
-      formClass: fooForm
+      unset: [foo, bazz/foo, bazz/bazz/bar]
+      options: {foo: bar, bazz: foo}
+      arguments: {foo: bazz}
       withSave: true
+      formClass: fooForm
       verbose: true
 
     pass:
       -
+        _ options: {foo: false, bazz: bar}
+        _ arguments: {foo: foo}
         foo: bar
         bar: bazz
         bazz:
@@ -37,16 +42,22 @@ Configuration
     fail:
       -
         _expectedErrors: [foo, bazz, bazz/bar]
-        foo: 
+        foo:
         bar: bazz
         bazz:
-          bar: 
+          bar:
           foo: bar
       # ...
 
+  - The **unset** options unsets specific widgets (i.e. captchas)
+
   - The **formClass** option defines which form the tester should instanciate.
 
-  - The **withSave** option invokes a sfForm::save call.
+  - The **options** defines a set of options passed to the form instanciation, can be overriden per set
+
+  - The **arguments** defines a set of arguments passed to the form instanciation, can be overriden per set
+
+  - The **withSave** option tests the invokation of sfForm::save.
 
   - The **verbose** option enables more detailed information on each test (**recommended**)
 
@@ -54,7 +65,8 @@ Configuration
 
   - The **fail** options holds all different datasets which should fail the form validation. the *_expectedErrors* options defines the errors you expect from the form. the *verbose* will show other errors as well.
 
-**Notice the *foo/bar/bazz/* notation, thats how you define errors in embedded forms.**
+**Notice the *foo/bar/bazz* notation, thats how you define errors in embedded forms.**
+
 
 Usage
 -----
@@ -67,16 +79,23 @@ in your tests you are able to use the tester this way:
     $tester->testData($t);         #for both set
     $tester->testData($t,'valid'); # for valid sets only
     $tester->testData($t,'invalid'); # for invalid sets only
-    
+
     //or the short way
     $tester = rsFormTester::create('path/to/config.yml')->testData($t);
 
-**Dont forget to increase the test count if you defined one**
+**Dont forget to increase the test count if you defined one!**
 
-*Thats it! All the different sets of data will be iterated and compared to what you expect*
+If you will you can pass an already instanciated form to the tester (before runnning your tests)
+
+    $form = new FooBarForm($object,array('special_option'=>'foo'),array('special_arg'=>'bar'));
+    $tester->setForm($form);
+
+    //go on with your tests
+
+
+*That's it! All the different sets of data will be iterated and compared to what you expect*
 
 TODO
 ----
-  - fix the form field unset option (e.g. for unsetting captchas from fieldschema)
   - remove dependency to lime
 
