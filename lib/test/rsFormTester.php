@@ -1,20 +1,39 @@
 <?php
 
+/**
+ *  this lets you easily unit-test your symfony forms with a set
+ *  of datas defined in a .yml file, you define sets which should pass,
+ *  you define sets that should fail, and define the errors you expect
+ *
+ * @copyright 2010 by Robert Schönthal
+ * @package rsFormTester
+ * @subpackage lib
+ */
 class rsFormTester
 {
-  // the default configuration
+  /**
+   * @var array $configuration the current configuration for the tester
+   */
   protected $configuration = array(
     'withSave' => false,
     'unset'    => array(),
     'formClass' => null,
-    'verbose' => true
+    'verbose' => true,
+    'options' => array(),
+    'arguments' => array()
   );
 
-  //the both datasets
-  protected $validData,$invalidData = array();
+  /**
+   * @var array $validData the valid dataSets
+   * @var array $invalidData the invalid dataSets
+   * @var array $messages the current messages for this set
+   */
+  protected $validData, $invalidData, $messages = array();
 
+  /**
+   * @var sfForm $form the current form instance to test
+   */
   protected $form;
-  protected $messages = array();
 
   /**
    * creates an instance the short way from a .yml file
@@ -103,21 +122,27 @@ class rsFormTester
   /**
    * returns the form instance, creates and configures the form if needed
    *
+   * @param array $options
+   * @param array arguments
    * @return sfForm
    * @throws LogicException
    */
-  public function getForm()
+  public function getForm(array $options=array(), array $arguments=array())
   {
+    $options = array_merge($options,$this->getAttribute('options'));
+    $arguments = array_merge($arguments,$this->getAttribute('arguments'));
+
     if(!$this->form && $formClass = $this->getAttribute('formClass'))
     {
-      $this->form = new $formClass();
-      $this->sanitizeForm();
+      $this->form = new $formClass($options,$arguments);
     }
 
     if(!$this->form)
     {
       throw new LogicException('no form is set in configuration');
     }
+
+    $this->sanitizeForm();
 
     return $this->form;
   }
@@ -132,6 +157,8 @@ class rsFormTester
   {
     $this->configuration['formClass'] = get_class($form);
     $this->form = $form;
+
+    $this->sanitizeForm();
 
     return $this;
   }
@@ -158,12 +185,20 @@ class rsFormTester
 
     $sets = ($which == 'valid') ? $this->validData : $this->invalidData;
 
-    foreach($sets as $key => $dataSet)
+    foreach((array) $sets as $key => $dataSet)
     {
       $expectedErrors = isset($dataSet['_expectedErrors']) ? $dataSet['_expectedErrors'] : array();
+      $options = isset($dataSet['_options']) ? $dataSet['_options'] : array();
+      $arguments = isset($dataSet['_arguments']) ? $dataSet['_arguments'] : array();
+
       $dataSet = $this->sanitizeDataSet($dataSet);
 
-      $this->form->rewind();
+      if($options || $arguments)
+      {
+        $this->getForm($options, $arguments);
+      }
+
+      //recreate form if options and arguments passed
       $this->form->bind($dataSet);
 
       //handle either valid checks or invalid checks on the bound form
@@ -178,26 +213,6 @@ class rsFormTester
     }
 
     return $this;
-  }
-
-  /**
-   * prints the messages for a dateSet
-   *
-   * @param mixed $tester
-   * @param string $setType
-   * @param boolean force
-   * @return string
-   */
-  protected function flushMessages($tester,$setType,$setName, $force=false)
-  {
-    if(($force || $this->getAttribute('verbose')) && $this->messages)
-    {
-      sort($this->messages);
-      $messages = join("\n",$this->messages);
-      $tester->info(sprintf("%s set[%s]:\n%s\n",$setType,$setName,$messages));
-    }
-
-    $this->messages = array();
   }
 
   /**
@@ -222,13 +237,26 @@ class rsFormTester
     }
     else
     {
+      $tester->is($this->form->isValid(),true,sprintf("form is valid for dataset [%s]",$key));
+
       //everything ok, save the form if needed and pass the test
       if($this->getAttribute('withSave'))
       {
-        $this->form->save();
-      }
+        try
+        {
+          $this->form->save();
+        }
+        catch(Exception $e)
+        {
+          //the form couldnt be saved, so fail the test
+          $tester->fail(sprintf("form saving successfull for dataset [%s]",$key));
 
-      $tester->is($this->form->isValid(),true,sprintf("form is valid for dataset [%s]",$key));
+          if($this->getAttribute('verbose'))
+          {
+            $tester->info($e->getMessage());
+          }
+        }
+      }
     }
   }
 
@@ -240,14 +268,7 @@ class rsFormTester
    * @param array $expectedErrors the expected errors for this set
    */
   protected function checkInvalidForm($tester, $key, $expectedErrors)
-  {
-    //check for errors if needed
-    if($this->getAttribute('verbose'))
-    {
-      $this->checkForExpectedErrors($expectedErrors);
-      $this->iterateErrors($this->form->getErrorSchema(),$expectedErrors);
-    }
-    
+  {    
     if($this->form->isValid())
     {
       //the form is valid, so fail the test
@@ -259,34 +280,16 @@ class rsFormTester
       $tester->pass(sprintf("form is invalid for dataset [%s]",$key));
     }
 
+    //check for errors if needed
+    if($this->getAttribute('verbose'))
+    {
+      $expectedErrors = $this->iterateErrors($this->form->getErrorSchema(),$expectedErrors);
+
+      $this->addExpectedErrorMessages($expectedErrors);
+    }
+
     $this->flushMessages($tester,'invalid',$key);
 
-  }
-
-  /**
-   * checks a dataset against the expectedErrors attribute set
-   *
-   * @param array $expectedErrors
-   */
-  protected function checkForExpectedErrors($expectedErrors)
-  {
-    //rewrite the global/named errors to be able to define a "foofile" option
-    //which is raised as an unexpected extra form field error
-    $globalErrors = $this->sanitizeErrorSchema($this->form->getErrorSchema()->getGlobalErrors());
-    $namedErrors = $this->sanitizeErrorSchema($this->form->getErrorSchema()->getNamedErrors());
-
-    foreach($expectedErrors as $error)
-    {
-      $fieldError = $this->getErrorForField($this->form->getErrorSchema(),$error);
-      $globalError = in_array($error, $globalErrors);
-      $namedError = in_array($error, $namedErrors);
-
-      //the expected error was not raised, so add add a message
-      if(!$fieldError && !$globalError && !$namedError)
-      {
-        $this->messages[] = sprintf('[expected error] "%s" not raised',$error);
-      }
-    }
   }
 
   /**
@@ -303,46 +306,28 @@ class rsFormTester
       //an embedded form, recursion
       if($error instanceof sfValidatorErrorSchema)
       {
-        $this->iterateErrors($error,$expectedErrors,$prefix.$field.'/');
+        $expectedErrors = $this->iterateErrors($error,$expectedErrors,$prefix.$field.'/');
       }
-
-      //cleanup message for finding expected errors in global/named errors
-      $message = $this->sanitizeMessage($error->getMessage());
-      $field = ($message != $error->getMessage()) ? $message : $field;
-
-      //not found in expected errors, so add a message
-      if(!$expectedErrors || !in_array($prefix.$field,$expectedErrors))
+      else
       {
-        $this->messages[] = '[error] '.($message != $error->getMessage() ? $error : '"'.$prefix.$field.'"').' raised';
+        //cleanup message for finding expected errors in global/named errors
+        $message = $this->sanitizeMessage($error->getMessage());
+        $field = ($message != $error->getMessage()) ? $message : $field;
+        
+        //not found in expected errors, so add a message
+        if(!$expectedErrors || !in_array($prefix.$field,$expectedErrors))
+        {
+          $this->messages[] = '[error] '.($message != $error->getMessage() && !$prefix ? $error : '"'.$prefix.$field.'"').' raised';
+        }
+
+        //TODO must be easier to unset a array field by value
+        $expectedErrors = array_flip($expectedErrors);
+        unset($expectedErrors[$prefix.$field]);
+        $expectedErrors = array_flip($expectedErrors);
       }
     }
-  }
 
-  /**
-   * returns a sfValidatorError for a field 
-   * foo/bar/bazz will search in embedded errorSchemas
-   *
-   * @param sfValidatorError $error
-   * @param string $field
-   * @return sfValidatorError
-   */
-  protected function getErrorForField(sfValidatorError $error,$field)
-  {
-    $field = $this->sanitizeFieldName($field);
-    
-    if(is_array($field) && $index = array_shift($field))
-    {
-      if(count($field) && $error->offsetExists($index))
-      {
-        return $this->getErrorForField($error->offsetGet($index),$field);
-      }
-
-      return $error->offsetGet($index);
-    }
-    else
-    {
-      return $error->offsetGet($field);
-    }
+    return $expectedErrors;
   }
 
   /**
@@ -375,8 +360,8 @@ class rsFormTester
       $set = array_merge($set,array($this->form->getCSRFFieldName() => $this->form->getCSRFToken()));
     }
 
-    //unset the expectedErrors config
-    unset($set['_expectedErrors']);
+    //unset the config options for this set
+    unset($set['_expectedErrors'],$set['_options'],$set['_arguments']);
 
     return $set;
   }
@@ -386,50 +371,40 @@ class rsFormTester
    */
   protected function sanitizeForm()
   {
-    //TODO this wont work as it should be
     foreach($this->getAttribute('unset') as $field)
     {
-      //$this->unsetField($this->form->getFormFieldSchema(),$field);
+      $this->unsetField($this->form->getWidgetSchema(),$this->form->getValidatorSchema(),$field);
     }
   }
 
-  /*protected function unsetField(sfFormFieldSchema &$schema,$field)
+  /**
+   * unsets all fields defined in the configuration
+   *
+   * @param sfWidgetFormSchema $wschema
+   * @param sfValidatorSchema $vschema
+   * @param string $field
+   */
+  protected function unsetField(sfWidgetFormSchema &$wschema, sfValidatorSchema &$vschema, $field)
   {
     $field = $this->sanitizeFieldName($field);
 
     if(is_array($field) && $index = array_shift($field))
     {
-      if(count($field) && $schema->offsetGet($index))
+      if(count($field) && $wschema->offsetGet($index))
       {
-        $this->unsetField($schema[$index],$field);
+        $this->unsetField($wschema[$index],$vschema[$index],$field);
       }
       else
       {
-        unset($schema[$index]);
+        unset($wschema[$index]);
+        unset($vschema[$index]);
       }
     }
     else
     {
-      unset($schema[$field]);
+      unset($wschema[$field]);
+      unset($vschema[$field]);
     }
-  }*/
-
-  /**
-   * sanitizes a errorschema and the messages (global/named)
-   *
-   * @param array $errors
-   * @return array
-   */
-  protected function sanitizeErrorSchema($errors)
-  {
-    $newErrors = array();
-
-    foreach($errors as $k => $error)
-    {
-      $newErrors[] = $this->sanitizeMessage($error->getMessage());
-    }
-
-    return $newErrors;
   }
 
   /**
@@ -453,4 +428,37 @@ class rsFormTester
     return $message;
   }
 
+  /**
+   * prints the messages for a dateSet
+   *
+   * @param mixed $tester
+   * @param string $setType
+   * @param boolean force
+   * @return string
+   */
+  protected function flushMessages($tester,$setType,$setName, $force=false)
+  {
+    if(($force || $this->getAttribute('verbose')) && $this->messages)
+    {
+      sort($this->messages);
+      $messages = join("\n",$this->messages);
+      $tester->info(sprintf("%s set[%s]:\n%s\n",$setType,$setName,$messages));
+    }
+
+    $this->messages = array();
+  }
+
+  /**
+   * adds the expected errors to the messages list
+   * this array should first be cleanup by iterate errors
+   *
+   * @param array $expectedErrors
+   */
+  protected function addExpectedErrorMessages($expectedErrors)
+  {
+    foreach($expectedErrors as $error)
+    {
+      $this->messages[] = sprintf('[expected error] "%s" not raised',$error);
+    }
+  }
 }

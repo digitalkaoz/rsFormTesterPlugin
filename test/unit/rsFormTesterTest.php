@@ -9,7 +9,9 @@ $defaults = array(
     'withSave' => false,
     'unset'    => array(),
     'formClass'=> null,
-    'verbose' => true
+    'verbose' => true,
+    'options' => array(),
+    'arguments' => array()
   );
 
 $testCount = 18;
@@ -80,7 +82,4 @@ try{
 
 //@Test testing data
 $t->diag('testing data');
-$test = new lime_test(null,array('verbose'=>true));
-#$t->is($tester->testData($test,'valid'),$tester,'valid data tested');
-#$t->is($tester->testData($test,'invalid'),$tester,'invalid data tested');
-$t->is($tester->testData($test),$tester,'both data tested');
+$t->is($tester->testData(new lime_test(null,array('verbose'=>true))),$tester,'both data tested');

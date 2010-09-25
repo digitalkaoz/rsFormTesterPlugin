@@ -1,0 +1,71 @@
+configuration:
+  unset: [foo, bazz/foo, bazz/bazz/bar]
+  #TODO allow a factory method beeing called to instanciate the form
+  #instanciation: ~
+  #TODO implement options
+  #options: []
+  #TODO implement arguments
+  #arguments: []
+  withSave: true
+  formClass: rsFormTesterForm
+  verbose: true
+
+pass:
+  -
+    #TODO implement options
+    #_options: []
+    #TODO implement arguments
+    #_arguments: []
+#    foo: bar
+    bar: bazz
+    bazz:
+      bar: foo
+#      foo: bar
+      bazz:
+        foo: bar
+#        bar: foo
+  -
+ #   foo: bar
+    bar: bazz
+    bazz:
+      bar: foo
+#      foo: bar
+      bazz:
+        foo: bar
+        bar: foo
+
+fail:
+  -
+    _expectedErrors: [foo, bazz/foo, bazz/bazz/bar]
+    foo: foo
+    bar: bar
+    bazz:
+      foo: foo
+      bar: foo
+      bazz:
+#        foo: bar
+        bar: foo
+#
+#  -
+#    _expectedErrors: [bazz/bazz/foo, bazz/bazz, bazz/foo, bazz/bar, bazz/bazz]
+#    foo: foo
+#    bar: bar
+#    file: foo.gif
+#  -
+#    _expectedErrors: [bazz/foo, bazz/bazz/bar]
+#    foo: foo
+#    bar: bar
+#    bazz:
+#      foo: foo
+#      bar: bar
+#      bazz:
+#        foo: bar
+#        bar: foo
+#  -
+#    _expectedErrors: []
+#    foo: foo
+#    bar: bar
+#    bazz:
+#      bar: bar
+#      bazz:
+#        foo: bar

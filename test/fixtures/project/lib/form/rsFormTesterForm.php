@@ -16,9 +16,10 @@ class rsFormTesterForm extends sfForm
     $this->embedForm('bazz', new rsFormTesterForm2());
   }
 
-  public function save()
-  {    
+  public function save(){
+    throw new Exception('foo');
   }
+
 }
 
 class rsFormTesterForm2 extends sfForm

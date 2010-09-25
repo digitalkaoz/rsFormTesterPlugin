@@ -1,31 +1,35 @@
 configuration:
-  #unsetting form field dont work right now
   unset: [foo, bazz/foo, bazz/bazz/bar]
+  options: { foo: bar, bazz: bar}
+  arguments: { foo: foo, bar: bar}
   withSave: true
   formClass: rsFormTesterForm
   verbose: true
 
 pass:
   -
+    _options: { foo: bazz}
+    _arguments: { bar: bazz}
+    bar: bazz
+    bazz:
+      bar: foo
+      bazz:
+        foo: bar
+  -
+    _options: { foo: bazz}
     foo: bar
     bar: bazz
     bazz:
       bar: foo
-      foo: bar
+#      foo: bar
       bazz:
         foo: bar
         bar: foo
-  -
-    foo: bar
-    bar: bazz
-    bazz:
-      bar: foo
-      bazz:
-        foo: bar
 
 fail:
   -
-    _expectedErrors: [foo, bazz/bar, bazz/bazz/foo]
+    _expectedErrors: [foo, bazz/foo, bazz/bazz/bar]
+    _arguments: { bar: bazz}
     foo: foo
     bar: bar
     bazz:
@@ -36,25 +40,23 @@ fail:
         bar: foo
 
   -
-    _expectedErrors: [bazz/bazz/foo, bazz/bazz, bazz/foo, bazz/bar, bazz/bazz]
-    foo: foo
+    _expectedErrors: [bazz/bazz/foo, bazz/foo, bazz/bar]
     bar: bar
     file: foo.gif
-#  -
-#    _expectedErrors: [bazz/foo, bazz/bazz/bar]
-#    foo: foo
-#    bar: bar
-#    bazz:
-#      foo: foo
-#      bar: bar
-#      bazz:
-#        foo: bar
-#        bar: foo
-#  -
-#    _expectedErrors: []
-#    foo: foo
-#    bar: bar
-#    bazz:
-#      bar: bar
-#      bazz:
-#        foo: bar
+  -
+    _options: { foo: bazz}
+    _arguments: { bar: bazz}
+    bar: bazz
+    bazz:
+      bar: foo
+      bazz:
+        foo: bar
+        file: foo
+  -
+    _options: { foo: bazz}
+    _arguments: { bar: bazz}
+    bar: bazz
+    bazz:
+      bar: foo
+      bazz:
+        foo: bar
