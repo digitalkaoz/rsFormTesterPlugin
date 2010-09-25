@@ -22,12 +22,17 @@ Configuration
 -------------
 
     configuration:
-      formClass: fooForm
+      unset: [foo, bazz/foo, bazz/bazz/bar]
+      options: {foo: bar, bazz: foo}
+      arguments: {foo: bazz}
       withSave: true
+      formClass: fooForm
       verbose: true
 
     pass:
       -
+        _ options: {foo: false, bazz: bar}
+        _ arguments: {foo: foo}
         foo: bar
         bar: bazz
         bazz:
@@ -44,9 +49,15 @@ Configuration
           foo: bar
       # ...
 
+  - The **unset** options unsets specific widgets (i.e. captchas)
+
   - The **formClass** option defines which form the tester should instanciate.
 
-  - The **withSave** option invokes a sfForm::save call.
+  - The **options** defines a set of options passed to the form instanciation, can be overriden per set
+
+  - The **arguments** defines a set of arguments passed to the form instanciation, can be overriden per set
+
+  - The **withSave** option tests the invokation of sfForm::save.
 
   - The **verbose** option enables more detailed information on each test (**recommended**)
 
@@ -54,7 +65,7 @@ Configuration
 
   - The **fail** options holds all different datasets which should fail the form validation. the *_expectedErrors* options defines the errors you expect from the form. the *verbose* will show other errors as well.
 
-**Notice the *foo/bar/bazz/* notation, thats how you define errors in embedded forms.**
+**Notice the *foo/bar/bazz* notation, thats how you define errors in embedded forms.**
 
 
 Usage
@@ -86,6 +97,5 @@ If you will you can pass an already instanciated form to the tester (before runn
 
 TODO
 ----
-  - fix the form field unset option (e.g. for unsetting captchas from fieldschema)
   - remove dependency to lime
 

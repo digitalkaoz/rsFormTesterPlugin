@@ -1,29 +1,29 @@
 configuration:
+  #unsetting widgets (i.e. captchas)
   unset: [foo, bazz/foo, bazz/bazz/bar]
-  #TODO allow a factory method beeing called to instanciate the form
-  #instanciation: ~
-  #TODO implement options
-  #options: []
-  #TODO implement arguments
-  #arguments: []
+  #options for form instanciation
+  options: {foo: bar, bazz: foo}
+  #arguments for form instanciation
+  arguments: {foo: bazz}
+  #save the form if its valid?
   withSave: true
+  #the form to instanciate
   formClass: rsFormTesterForm
+  #show output (recommend)
   verbose: true
 
+#sets of data that should pass the validation
 pass:
   -
-    #TODO implement options
-    #_options: []
-    #TODO implement arguments
-    #_arguments: []
-#    foo: bar
+    #options override for this set
+    _options: {foo: bazz, bazz: bar}
+    #arguments override for this set
+    _arguments: {foo: foo}
     bar: bazz
     bazz:
       bar: foo
-#      foo: bar
       bazz:
         foo: bar
-#        bar: foo
   -
  #   foo: bar
     bar: bazz
@@ -45,27 +45,3 @@ fail:
       bazz:
 #        foo: bar
         bar: foo
-#
-#  -
-#    _expectedErrors: [bazz/bazz/foo, bazz/bazz, bazz/foo, bazz/bar, bazz/bazz]
-#    foo: foo
-#    bar: bar
-#    file: foo.gif
-#  -
-#    _expectedErrors: [bazz/foo, bazz/bazz/bar]
-#    foo: foo
-#    bar: bar
-#    bazz:
-#      foo: foo
-#      bar: bar
-#      bazz:
-#        foo: bar
-#        bar: foo
-#  -
-#    _expectedErrors: []
-#    foo: foo
-#    bar: bar
-#    bazz:
-#      bar: bar
-#      bazz:
-#        foo: bar
