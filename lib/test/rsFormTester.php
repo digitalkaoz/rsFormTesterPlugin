@@ -225,19 +225,19 @@ class rsFormTester
   {
     if(!$this->form->isValid())
     {
-      //the form isnt valid so fail the test and print the errors
-      $tester->fail(sprintf("form is valid for dataset [%s]",$key));
-
       //check for errors if needed
       if($this->getAttribute('verbose'))
       {
         $this->iterateErrors($this->form->getErrorSchema(),array());
         $this->flushMessages($tester,'valid',$key, true);
       }
+      
+      //the form isnt valid so fail the test and print the errors
+      $tester->fail(sprintf("form is valid for dataset [%s]",$key));
     }
     else
     {
-      $tester->is($this->form->isValid(),true,sprintf("form is valid for dataset [%s]",$key));
+      $tester->pass(sprintf("form is valid for dataset [%s]",$key));
 
       //everything ok, save the form if needed and pass the test
       if($this->getAttribute('withSave'))
@@ -248,13 +248,12 @@ class rsFormTester
         }
         catch(Exception $e)
         {
-          //the form couldnt be saved, so fail the test
-          $tester->fail(sprintf("form saving successfull for dataset [%s]",$key));
-
           if($this->getAttribute('verbose'))
           {
             $tester->info($e->getMessage());
           }
+          //the form couldnt be saved, so fail the test
+          $tester->fail(sprintf("form saving successfull for dataset [%s]",$key));
         }
       }
     }
@@ -269,6 +268,14 @@ class rsFormTester
    */
   protected function checkInvalidForm($tester, $key, $expectedErrors)
   {    
+    //check for errors if needed
+    if($this->getAttribute('verbose'))
+    {
+      $expectedErrors = $this->iterateErrors($this->form->getErrorSchema(),$expectedErrors);
+      $this->addExpectedErrorMessages($expectedErrors);
+      $this->flushMessages($tester,'invalid',$key);
+    }
+    
     if($this->form->isValid())
     {
       //the form is valid, so fail the test
@@ -279,17 +286,6 @@ class rsFormTester
       //everything ok, the form isnt valid, so pass the test
       $tester->pass(sprintf("form is invalid for dataset [%s]",$key));
     }
-
-    //check for errors if needed
-    if($this->getAttribute('verbose'))
-    {
-      $expectedErrors = $this->iterateErrors($this->form->getErrorSchema(),$expectedErrors);
-
-      $this->addExpectedErrorMessages($expectedErrors);
-    }
-
-    $this->flushMessages($tester,'invalid',$key);
-
   }
 
   /**
