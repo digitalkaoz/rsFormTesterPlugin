@@ -438,7 +438,7 @@ class rsFormTester
    */
   protected function flushMessages($tester,$setType,$setName, $force=false)
   {
-    if(($force || $this->getAttribute('verbose')) && $this->messages)
+    if($force || ($this->getAttribute('verbose') && $this->messages))
     {
       sort($this->messages);
       $messages = join("\n",$this->messages);
