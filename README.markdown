@@ -31,8 +31,8 @@ Configuration
 
     pass:
       -
-        _ options: {foo: false, bazz: bar}
-        _ arguments: {foo: foo}
+        _options: {foo: false, bazz: bar}
+        _arguments: {foo: foo}
         foo: bar
         bar: bazz
         bazz:
