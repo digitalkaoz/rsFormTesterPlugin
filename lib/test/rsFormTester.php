@@ -198,6 +198,8 @@ class rsFormTester
         $this->getForm($options, $arguments);
       }
 
+      $form = clone $this->form;
+      
       //recreate form if options and arguments passed
       $this->form->bind($dataSet);
 
@@ -210,6 +212,8 @@ class rsFormTester
       {
         $this->checkInvalidForm($tester,$key,$expectedErrors);        
       }
+      
+      $this->form = $form;
     }
 
     return $this;
