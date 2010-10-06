@@ -193,6 +193,7 @@ class rsFormTester
 
       $dataSet = $this->sanitizeDataSet($dataSet);
 
+      //recreate form if options and arguments passed
       if($options || $arguments)
       {
         $this->getForm($options, $arguments);
@@ -200,8 +201,15 @@ class rsFormTester
 
       $form = clone $this->form;
       
-      //recreate form if options and arguments passed
-      $this->form->bind($dataSet);
+      if($this->form->isMultipart())
+      {
+        //TODO think of a mechanism to get all file uploads from a set
+        $this->form->bind($dataSet,array());
+      }
+      else
+      {
+        $this->form->bind($dataSet);
+      }
 
       //handle either valid checks or invalid checks on the bound form
       if($which == 'valid')
@@ -373,7 +381,13 @@ class rsFormTester
   {
     foreach($this->getAttribute('unset') as $field)
     {
-      $this->unsetField($this->form->getWidgetSchema(),$this->form->getValidatorSchema(),$field);
+      $wschema = $this->form->getWidgetSchema();
+      $vschema = $this->form->getValidatorSchema();
+
+      $this->unsetField($wschema,$vschema,$field);
+
+      $this->form->setWidgetSchema($wschema);
+      $this->form->setValidatorSchema($vschema);
     }
   }
 
