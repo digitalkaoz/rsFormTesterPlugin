@@ -92,7 +92,8 @@ class rsFormTester
    */
   public function  __call($name, $arguments)
   {
-    $var = lcfirst(substr($name,3));
+    $name{0} = strtolower($name{0});
+    $var = $name(substr($name,3));
 
     if(isset($this->$var))
     {
