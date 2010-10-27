@@ -326,7 +326,7 @@ class rsFormTester
         //not found in expected errors, so add a message
         if(!$expectedErrors || !in_array($prefix.$field,$expectedErrors))
         {
-          $this->messages[] = '[error] '.($message != $error->getMessage() && !$prefix ? $error : '"'.$prefix.$field.'"').' raised';
+          $this->messages[] = '[error] '. ($message != $error->getMessage() && !$prefix ? $error : '"'.$prefix.$field.'"').' raised ['. $error->getMessage().']';
         }
 
         //TODO must be easier to unset a array field by value
