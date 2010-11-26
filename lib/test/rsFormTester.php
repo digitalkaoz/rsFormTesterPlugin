@@ -93,13 +93,15 @@ class rsFormTester
   public function  __call($name, $arguments)
   {
     $name{0} = strtolower($name{0});
-    $var = $name(substr($name,3));
-
+    
+    $var = substr($name,3);
+    $var{0} = strtolower($var{0});
+    
     if(isset($this->$var))
     {
       return $this->$var;
-    }
-
+    }      
+    
     throw new BadMethodCallException(sprintf('method "%s" not found in %s',$name,get_class($this)));
   }
 
