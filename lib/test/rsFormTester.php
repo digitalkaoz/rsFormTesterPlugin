@@ -331,10 +331,7 @@ class rsFormTester
           $this->messages[] = '[error] '. ($message != $error->getMessage() && !$prefix ? $error : '"'.$prefix.$field.'"').' raised ['. $error->getMessage().']';
         }
 
-        //TODO must be easier to unset a array field by value
-        $expectedErrors = array_flip($expectedErrors);
-        unset($expectedErrors[$prefix.$field]);
-        $expectedErrors = array_flip($expectedErrors);
+        $expectedErrors = array_diff($expectedErrors, array($prefix.$field)); 
       }
     }
 
