@@ -348,7 +348,7 @@ class rsFormTester
   {
     if(!is_array($field) && strpos($field, '/'))
     {
-      $field = split('/', $field);
+      $field = explode('/', $field);
     }
 
     return $field;
