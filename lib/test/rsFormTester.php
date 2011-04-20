@@ -259,7 +259,14 @@ class rsFormTester
       {
         try
         {
-          $this->form->save();
+          if($this->form instanceof 'sfFormFilter')
+          {
+            $this->form->getCriteria();
+          }
+          elseif($this->form instanceof 'sfForm')
+          {
+            $this->form->save();
+          }
         }
         catch(Exception $e)
         {
@@ -283,13 +290,19 @@ class rsFormTester
    */
   protected function checkInvalidForm($tester, $key, $expectedErrors)
   {    
+    $expectedErrors = $this->iterateErrors($this->form->getErrorSchema(),$expectedErrors);
+        
     //check for errors if needed
     if($this->getAttribute('verbose'))
     {
-      $expectedErrors = $this->iterateErrors($this->form->getErrorSchema(),$expectedErrors);
       $this->addExpectedErrorMessages($expectedErrors);
       $this->flushMessages($tester,'invalid',$key);
     }
+    
+    if(count($expectedErrors) > 0)
+    {
+      $tester->fail(sprintf("not all expected errors raised for dataset [%s]",$key));
+    }    
     
     if($this->form->isValid())
     {
