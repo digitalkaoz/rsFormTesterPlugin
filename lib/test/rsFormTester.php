@@ -259,11 +259,11 @@ class rsFormTester
       {
         try
         {
-          if($this->form instanceof 'sfFormFilter')
+          if($this->form instanceof sfFormFilter)
           {
             $this->form->getCriteria();
           }
-          elseif($this->form instanceof 'sfForm')
+          elseif($this->form instanceof sfForm)
           {
             $this->form->save();
           }
